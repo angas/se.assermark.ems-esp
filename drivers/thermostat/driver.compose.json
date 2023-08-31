@@ -1,0 +1,37 @@
+{
+  "name": {
+    "en": "Thermostat"
+  },
+  "class": "thermostat",
+  "capabilities": [
+    "target_temperature",
+    "thermostat_dampedoutdoortemp",
+    "thermostat_hc1_hpoperatingstate"
+  ],
+  "capabilitiesOptions": {
+    "target_temperature": { "min": 0, "max": 30 }
+  },
+  "platforms": ["local"],
+  "connectivity": ["lan"],
+  "images": {
+    "small": "{{driverAssetsPath}}/images/small.png",
+    "large": "{{driverAssetsPath}}/images/large.png",
+    "xlarge": "{{driverAssetsPath}}/images/xlarge.png"
+  },
+  "pair": [
+    {
+      "id": "pair",
+      "navigation": { "next": "list_devices" }
+    },
+    {
+      "id": "list_devices",
+      "template": "list_devices",
+      "navigation": { "next": "add_devices" },
+      "options": { "singular": true }
+    },
+    {
+      "id": "add_devices",
+      "template": "add_devices"
+    }
+  ]
+}

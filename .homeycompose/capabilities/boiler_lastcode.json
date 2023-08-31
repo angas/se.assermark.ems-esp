@@ -1,0 +1,10 @@
+{
+  "type": "string",
+  "title": {
+    "en": "Last Code",
+    "sv": "Senaste kod"
+  },
+  "getable": true,
+  "setable": false,
+  "icon": "/assets/error.svg"
+}

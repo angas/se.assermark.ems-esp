@@ -1,0 +1,460 @@
+{
+  "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
+  "id": "se.assermark.ems-esp",
+  "version": "1.0.0",
+  "compatibility": ">=5.0.0",
+  "sdk": 3,
+  "platforms": [
+    "local"
+  ],
+  "name": {
+    "en": "EMS-ESP"
+  },
+  "description": {
+    "en": "Adds support for EMS-ESP devices."
+  },
+  "category": [
+    "climate"
+  ],
+  "permissions": [],
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png",
+    "xlarge": "/assets/images/xlarge.png"
+  },
+  "author": {
+    "name": "Andreas Assermark",
+    "email": "assermark@gmail.com"
+  },
+  "brandColor": "#375f92",
+  "flow": {
+    "triggers": [
+      {
+        "id": "boiler_lastcode_changed",
+        "title": {
+          "en": "Boiler last code changed"
+        },
+        "tokens": [
+          {
+            "type": "string",
+            "name": "boiler_lastcode",
+            "title": {
+              "en": "Last code"
+            },
+            "example": {
+              "en": "A01 (5448)"
+            }
+          }
+        ],
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=boiler"
+          }
+        ]
+      },
+      {
+        "id": "boiler_wwcurtemp_less_than",
+        "title": {
+          "en": "Tap water temp less than"
+        },
+        "titleFormatted": {
+          "en": "Tap water temp less than [[wwcurtemp]]°C",
+          "sv": "Varmvattentemp lägre än [[wwcurtemp]]°C"
+        },
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=boiler"
+          },
+          {
+            "type": "range",
+            "name": "wwcurtemp",
+            "min": 0,
+            "max": 100,
+            "step": 1
+          }
+        ],
+        "tokens": [
+          {
+            "type": "number",
+            "name": "wwcurtemp",
+            "title": {
+              "en": "Temperature"
+            },
+            "example": {
+              "en": "50"
+            }
+          }
+        ]
+      },
+      {
+        "id": "thermostat_hc1_hpoperatingstate_changed",
+        "title": {
+          "en": "Heatpump operating state changed"
+        },
+        "tokens": [
+          {
+            "type": "string",
+            "name": "thermostat_hc1_hpoperatingstate",
+            "title": {
+              "en": "Operating state"
+            },
+            "example": {
+              "en": "Heating"
+            }
+          }
+        ],
+        "args": [
+          {
+            "type": "device",
+            "name": "device",
+            "filter": "driver_id=thermostat"
+          }
+        ]
+      }
+    ]
+  },
+  "drivers": [
+    {
+      "name": {
+        "en": "Boiler"
+      },
+      "class": "heater",
+      "capabilities": [
+        "boiler_curflowtemp",
+        "boiler_rettemp",
+        "boiler_hpbrinein",
+        "boiler_hpbrineout",
+        "boiler_hpbrinepumpspd",
+        "boiler_hpcircspd",
+        "boiler_hpcompspd",
+        "boiler_wwcurtemp",
+        "boiler_lastcode"
+      ],
+      "platforms": [
+        "local"
+      ],
+      "connectivity": [
+        "lan"
+      ],
+      "images": {
+        "small": "/drivers/boiler/assets/images/small.png",
+        "large": "/drivers/boiler/assets/images/large.png",
+        "xlarge": "/drivers/boiler/assets/images/xlarge.png"
+      },
+      "pair": [
+        {
+          "id": "pair",
+          "navigation": {
+            "next": "list_devices"
+          }
+        },
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          },
+          "options": {
+            "singular": true
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ],
+      "id": "boiler",
+      "settings": [
+        {
+          "type": "group",
+          "label": {
+            "en": "Server Settings",
+            "sv": "Serverinställningar"
+          },
+          "children": [
+            {
+              "id": "network_address",
+              "type": "text",
+              "label": {
+                "en": "Network Adddress",
+                "sv": "Network Adddress"
+              },
+              "value": "ems-esp.local"
+            },
+            {
+              "id": "access_token",
+              "type": "text",
+              "label": {
+                "en": "Access Token",
+                "sv": "Access Token"
+              },
+              "hint": {
+                "en": "Found in EMS-ESP web interface, under Security and Manage Users",
+                "sv": "Finns i EMS-ESP webb gränssnitt, under Säkerhet och Användare"
+              },
+              "value": ""
+            },
+            {
+              "id": "poll_interval",
+              "type": "number",
+              "label": {
+                "en": "Poll intervall in ms",
+                "sv": "Poll intervall i ms"
+              },
+              "value": 10000
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": {
+        "en": "Thermostat"
+      },
+      "class": "thermostat",
+      "capabilities": [
+        "target_temperature",
+        "thermostat_dampedoutdoortemp",
+        "thermostat_hc1_hpoperatingstate"
+      ],
+      "capabilitiesOptions": {
+        "target_temperature": {
+          "min": 0,
+          "max": 30
+        }
+      },
+      "platforms": [
+        "local"
+      ],
+      "connectivity": [
+        "lan"
+      ],
+      "images": {
+        "small": "/drivers/thermostat/assets/images/small.png",
+        "large": "/drivers/thermostat/assets/images/large.png",
+        "xlarge": "/drivers/thermostat/assets/images/xlarge.png"
+      },
+      "pair": [
+        {
+          "id": "pair",
+          "navigation": {
+            "next": "list_devices"
+          }
+        },
+        {
+          "id": "list_devices",
+          "template": "list_devices",
+          "navigation": {
+            "next": "add_devices"
+          },
+          "options": {
+            "singular": true
+          }
+        },
+        {
+          "id": "add_devices",
+          "template": "add_devices"
+        }
+      ],
+      "id": "thermostat",
+      "settings": [
+        {
+          "type": "group",
+          "label": {
+            "en": "Server Settings",
+            "sv": "Serverinställningar"
+          },
+          "children": [
+            {
+              "id": "network_address",
+              "type": "text",
+              "label": {
+                "en": "Network Adddress",
+                "sv": "Network Adddress"
+              },
+              "value": "ems-esp.local"
+            },
+            {
+              "id": "access_token",
+              "type": "text",
+              "label": {
+                "en": "Access Token",
+                "sv": "Access Token"
+              },
+              "hint": {
+                "en": "Found in EMS-ESP web interface, under Security and Manage Users",
+                "sv": "Finns i EMS-ESP webb gränssnitt, under Säkerhet och Användare"
+              },
+              "value": ""
+            },
+            {
+              "id": "poll_interval",
+              "type": "number",
+              "label": {
+                "en": "Poll intervall in ms",
+                "sv": "Poll intervall i ms"
+              },
+              "value": 5000
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "capabilities": {
+    "boiler_curflowtemp": {
+      "type": "number",
+      "title": {
+        "en": "Flow temp",
+        "sv": "Framledningstemp"
+      },
+      "getable": true,
+      "setable": false,
+      "units": {
+        "en": "°C"
+      },
+      "decimals": 1,
+      "icon": "/assets/thermometer.svg"
+    },
+    "boiler_hpbrinein": {
+      "type": "number",
+      "title": {
+        "en": "Brine circuit in",
+        "sv": "Köldbärare in"
+      },
+      "getable": true,
+      "setable": false,
+      "units": {
+        "en": "°C"
+      },
+      "decimals": 1,
+      "icon": "/assets/thermometer.svg"
+    },
+    "boiler_hpbrineout": {
+      "type": "number",
+      "title": {
+        "en": "Brine circuit out",
+        "sv": "Köldbärare ut"
+      },
+      "getable": true,
+      "setable": false,
+      "units": {
+        "en": "°C"
+      },
+      "decimals": 1,
+      "icon": "/assets/thermometer.svg"
+    },
+    "boiler_hpbrinepumpspd": {
+      "type": "number",
+      "title": {
+        "en": "Brine pump speed",
+        "sv": "Köldbärarpump hastighet"
+      },
+      "getable": true,
+      "setable": false,
+      "units": {
+        "en": "%"
+      },
+      "min": 0,
+      "max": 100,
+      "decimals": 0,
+      "icon": "/assets/pump.svg"
+    },
+    "boiler_hpcircspd": {
+      "type": "number",
+      "title": {
+        "en": "Circulation pump speed",
+        "sv": "Cirkulationspump hastighet"
+      },
+      "getable": true,
+      "setable": false,
+      "units": {
+        "en": "%"
+      },
+      "min": 0,
+      "max": 100,
+      "decimals": 0,
+      "icon": "/assets/pump.svg"
+    },
+    "boiler_hpcompspd": {
+      "type": "number",
+      "title": {
+        "en": "Compressor pump speed",
+        "sv": "Kompressorpump hastighet"
+      },
+      "getable": true,
+      "setable": false,
+      "units": {
+        "en": "%"
+      },
+      "min": 0,
+      "max": 100,
+      "decimals": 0,
+      "icon": "/assets/pump.svg"
+    },
+    "boiler_lastcode": {
+      "type": "string",
+      "title": {
+        "en": "Last Code",
+        "sv": "Senaste kod"
+      },
+      "getable": true,
+      "setable": false,
+      "icon": "/assets/error.svg"
+    },
+    "boiler_rettemp": {
+      "type": "number",
+      "title": {
+        "en": "Return temp",
+        "sv": "Returtemp"
+      },
+      "getable": true,
+      "setable": false,
+      "units": {
+        "en": "°C"
+      },
+      "decimals": 1,
+      "icon": "/assets/thermometer.svg"
+    },
+    "boiler_wwcurtemp": {
+      "type": "number",
+      "title": {
+        "en": "Tap water temp",
+        "sv": "Varmvatten temp"
+      },
+      "getable": true,
+      "setable": false,
+      "units": {
+        "en": "°C"
+      },
+      "decimals": 1,
+      "icon": "/assets/thermometer.svg"
+    },
+    "thermostat_dampedoutdoortemp": {
+      "type": "number",
+      "title": {
+        "en": "Outdoor Temp"
+      },
+      "getable": true,
+      "setable": false,
+      "units": {
+        "en": "°C"
+      },
+      "decimals": 1,
+      "icon": "/assets/thermometer.svg"
+    },
+    "thermostat_hc1_hpoperatingstate": {
+      "type": "string",
+      "title": {
+        "en": "Operating State"
+      },
+      "getable": true,
+      "setable": false,
+      "icon": "/assets/state.svg"
+    }
+  }
+}

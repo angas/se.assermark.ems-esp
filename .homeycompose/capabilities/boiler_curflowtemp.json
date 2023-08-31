@@ -1,0 +1,12 @@
+{
+  "type": "number",
+  "title": {
+    "en": "Flow temp",
+    "sv": "Framledningstemp"
+  },
+  "getable": true,
+  "setable": false,
+  "units": { "en": "°C" },
+  "decimals": 1,
+  "icon": "/assets/thermometer.svg"
+}

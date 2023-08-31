@@ -1,0 +1,7 @@
+{
+  "type": "string",
+  "title": { "en": "Operating State" },
+  "getable": true,
+  "setable": false,
+  "icon": "/assets/state.svg"
+}

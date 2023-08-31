@@ -1,0 +1,53 @@
+{
+  "triggers": [
+    {
+      "id": "boiler_lastcode_changed",
+      "title": {
+        "en": "Boiler last code changed"
+      },
+      "tokens": [
+        {
+          "type": "string",
+          "name": "boiler_lastcode",
+          "title": {
+            "en": "Last code"
+          },
+          "example": {
+            "en": "A01 (5448)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "boiler_wwcurtemp_less_than",
+      "title": {
+        "en": "Tap water temp less than"
+      },
+      "titleFormatted": {
+        "en": "Tap water temp less than [[wwcurtemp]]°C",
+        "sv": "Varmvattentemp lägre än [[wwcurtemp]]°C"
+      },
+      "args": [
+        {
+          "type": "range",
+          "name": "wwcurtemp",
+          "min": 0,
+          "max": 100,
+          "step": 1
+        }
+      ],
+      "tokens": [
+        {
+          "type": "number",
+          "name": "wwcurtemp",
+          "title": {
+            "en": "Temperature"
+          },
+          "example": {
+            "en": "50"
+          }
+        }
+      ]
+    }
+  ]
+}

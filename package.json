@@ -1,0 +1,22 @@
+{
+  "name": "se.assermark.ems-esp",
+  "version": "1.0.0",
+  "main": "app.ts",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint --ext .js,.ts --ignore-path .gitignore ."
+  },
+  "devDependencies": {
+    "@tsconfig/node16": "^16.1.1",
+    "@types/homey": "npm:homey-apps-sdk-v3-types@^0.3.4",
+    "@types/node": "^20.5.6",
+    "@types/node-fetch": "^2.6.4",
+    "eslint": "^7.32.0",
+    "eslint-config-athom": "^3.1.1",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "async-mutex": "^0.4.0",
+    "node-fetch": "2.7"
+  }
+}

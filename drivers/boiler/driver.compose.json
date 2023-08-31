@@ -1,0 +1,40 @@
+{
+  "name": {
+    "en": "Boiler"
+  },
+  "class": "heater",
+  "capabilities": [
+    "boiler_curflowtemp",
+    "boiler_rettemp",
+    "boiler_hpbrinein",
+    "boiler_hpbrineout",
+    "boiler_hpbrinepumpspd",
+    "boiler_hpcircspd",
+    "boiler_hpcompspd",
+    "boiler_wwcurtemp",
+    "boiler_lastcode"
+  ],
+  "platforms": ["local"],
+  "connectivity": ["lan"],
+  "images": {
+    "small": "{{driverAssetsPath}}/images/small.png",
+    "large": "{{driverAssetsPath}}/images/large.png",
+    "xlarge": "{{driverAssetsPath}}/images/xlarge.png"
+  },
+  "pair": [
+    {
+      "id": "pair",
+      "navigation": { "next": "list_devices" }
+    },
+    {
+      "id": "list_devices",
+      "template": "list_devices",
+      "navigation": { "next": "add_devices" },
+      "options": { "singular": true }
+    },
+    {
+      "id": "add_devices",
+      "template": "add_devices"
+    }
+  ]
+}

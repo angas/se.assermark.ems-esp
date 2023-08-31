@@ -1,0 +1,14 @@
+{
+  "type": "number",
+  "title": {
+    "en": "Brine pump speed",
+    "sv": "Köldbärarpump hastighet"
+  },
+  "getable": true,
+  "setable": false,
+  "units": { "en": "%" },
+  "min": 0,
+  "max": 100,
+  "decimals": 0,
+  "icon": "/assets/pump.svg"
+}

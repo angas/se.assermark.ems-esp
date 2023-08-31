@@ -1,0 +1,22 @@
+{
+  "triggers": [
+    {
+      "id": "thermostat_hc1_hpoperatingstate_changed",
+      "title": {
+        "en": "Heatpump operating state changed"
+      },
+      "tokens": [
+        {
+          "type": "string",
+          "name": "thermostat_hc1_hpoperatingstate",
+          "title": {
+            "en": "Operating state"
+          },
+          "example": {
+            "en": "Heating"
+          }
+        }
+      ]
+    }
+  ]
+}

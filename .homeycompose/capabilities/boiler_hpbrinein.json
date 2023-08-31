@@ -1,0 +1,12 @@
+{
+  "type": "number",
+  "title": {
+    "en": "Brine circuit in",
+    "sv": "Köldbärare in"
+  },
+  "getable": true,
+  "setable": false,
+  "units": { "en": "°C" },
+  "decimals": 1,
+  "icon": "/assets/thermometer.svg"
+}

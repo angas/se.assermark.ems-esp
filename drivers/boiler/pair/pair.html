@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+
+  <body>
+    <fieldset class="homey-form-fieldset" style="margin-top: 0">
+      <div class="homey-form-group">
+        <label
+          class="homey-form-label"
+          for="network_address"
+          data-i18n="pair.network_address"
+        ></label>
+        <input class="homey-form-input" id="network_address" type="text" />
+      </div>
+
+      <div class="homey-form-group">
+        <label
+          class="homey-form-label"
+          for="access_token"
+          data-i18n="pair.access_token"
+        ></label>
+        <input class="homey-form-input" id="access_token" type="password" />
+        <div class="hint" data-i18n="pair.access_token_hint"></div>
+      </div>
+
+      <div>
+        <div class="flex-container">
+          <div class="item-left" id="result"></div>
+          <div class="item-right">
+            <button
+              id="submit"
+              data-i18n="pair.check_connection"
+              class="homey-button-primary"
+            >
+              Check connection
+            </button>
+          </div>
+        </div>
+      </div>
+    </fieldset>
+
+    <script type="text/javascript">
+      const getVal = (id) => document.getElementById(id).value;
+      const setVal = (id, val) => (document.getElementById(id).value = val);
+      const setTxt = (id, txt) => (document.getElementById(id).innerHTML = txt);
+
+      Homey.setTitle(Homey.__("pair.title"));
+      Homey.setSubtitle(Homey.__("pair.subtitle", { device: "Boiler" }));
+
+      // Fetch existing settings
+      (function getSettings() {
+        Homey.showLoadingOverlay();
+        Homey.emit("get_settings", (err, settings) => {
+          Homey.hideLoadingOverlay();
+          if (err) {
+            if (err) Homey.alert(err, "error", () => {});
+          } else {
+            setVal("network_address", settings.network_address);
+            setVal("access_token", settings.access_token);
+          }
+        });
+      })();
+
+      document.getElementById("submit").onclick = (e) => {
+        const settings = {
+          network_address: getVal("network_address"),
+          access_token: getVal("access_token"),
+        };
+        e.preventDefault();
+        setTxt("result", "");
+        Homey.showLoadingOverlay();
+        Homey.emit("check_connection", settings, (err, result) => {
+          if (err) {
+            Homey.hideLoadingOverlay();
+            Homey.alert(err, "error", () => {});
+          } else {
+            const version = result["System Info"]["version"];
+            setTxt("result", `EMS-ESP (ver: ${version}) found!`);
+            Homey.emit("set_settings", settings, (err) => {
+              Homey.hideLoadingOverlay();
+              if (err) Homey.alert(err, "error", () => {});
+            });
+          }
+        });
+      };
+    </script>
+
+    <style>
+      .flex-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .item-left {
+        color: green;
+        flex-grow: 1;
+      }
+
+      .item-right {
+        margin-left: 10px;
+      }
+
+      .hint {
+        font-size: 12px;
+        color: #999;
+        margin-top: 5px;
+      }
+    </style>
+  </body>
+</html>

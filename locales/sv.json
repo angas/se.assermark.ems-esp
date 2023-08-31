@@ -1,0 +1,10 @@
+{
+  "pair": {
+    "title": "EMS-ESP",
+    "subtitle": "",
+    "network_address": "Nätverksadress (IP eller hostname)",
+    "access_token": "Access Token för admin",
+    "access_token_hint": "Finns i EMS-ESP webb gränssnitt, under Säkerhet och Användare. Krävs för skrivåtkomst",
+    "check_connection": "Kontrollera anslutning"
+  }
+}
