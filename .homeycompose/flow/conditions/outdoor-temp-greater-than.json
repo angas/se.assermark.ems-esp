@@ -1,0 +1,20 @@
+{
+  "title": {
+    "en": "Outdoor temperature greater than..."
+  },
+  "titleFormatted": {
+    "en": "Outdoor temperature greater than [[temp]]°C"
+  },
+  "args": [
+    {
+      "type": "number",
+      "name": "temp",
+      "placeholder": {
+        "en": "0"
+      },
+      "min": -50,
+      "max": 50,
+      "step": 0.5
+    }
+  ]
+}

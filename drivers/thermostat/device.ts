@@ -76,6 +76,10 @@ class ThermostatDevice extends Homey.Device {
     this.registerCapabilityListener("target_temperature", async (value) => {
       this.log(`Updating selected temperature to ${value}°C`);
       try {
+        if (this.oldData?.hc1.seltemp === value) {
+          this.log(`Don't update selected temperature, is already ${value}°C`);
+          return;
+        }
         this.stopPolling?.();
         await this.client.setSelectedTemp(value).catch(this.error);
         this.setCapabilityValue("target_temperature", value).catch(this.error);
@@ -88,6 +92,20 @@ class ThermostatDevice extends Homey.Device {
         setTimeout(() => this.startPolling(), this.intervalMs);
       }
     });
+
+    this.homey.flow
+      .getConditionCard("outdoor-temp-less-than")
+      .registerRunListener(async (args: { temp: number }, state) => {
+        const temp = this.oldData?.dampedoutdoortemp;
+        return temp && temp < args.temp;
+      });
+
+    this.homey.flow
+      .getConditionCard("outdoor-temp-greater-than")
+      .registerRunListener(async (args: { temp: number }, state) => {
+        const temp = this.oldData?.dampedoutdoortemp;
+        return temp && temp > args.temp;
+      });
 
     this.startPolling();
   }
