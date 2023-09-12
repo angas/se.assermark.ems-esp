@@ -318,6 +318,7 @@
         "en": "°C"
       },
       "decimals": 1,
+      "insights": true,
       "icon": "/assets/thermometer.svg"
     },
     "boiler_hpbrinein": {
@@ -332,6 +333,7 @@
         "en": "°C"
       },
       "decimals": 1,
+      "insights": true,
       "icon": "/assets/thermometer.svg"
     },
     "boiler_hpbrineout": {
@@ -346,6 +348,7 @@
         "en": "°C"
       },
       "decimals": 1,
+      "insights": true,
       "icon": "/assets/thermometer.svg"
     },
     "boiler_hpbrinepumpspd": {
@@ -362,6 +365,7 @@
       "min": 0,
       "max": 100,
       "decimals": 0,
+      "insights": true,
       "icon": "/assets/pump.svg"
     },
     "boiler_hpcircspd": {
@@ -378,6 +382,7 @@
       "min": 0,
       "max": 100,
       "decimals": 0,
+      "insights": true,
       "icon": "/assets/pump.svg"
     },
     "boiler_hpcompspd": {
@@ -394,6 +399,7 @@
       "min": 0,
       "max": 100,
       "decimals": 0,
+      "insights": true,
       "icon": "/assets/pump.svg"
     },
     "boiler_lastcode": {
@@ -404,6 +410,7 @@
       },
       "getable": true,
       "setable": false,
+      "insights": false,
       "icon": "/assets/error.svg"
     },
     "boiler_rettemp": {
@@ -418,6 +425,7 @@
         "en": "°C"
       },
       "decimals": 1,
+      "insights": true,
       "icon": "/assets/thermometer.svg"
     },
     "boiler_wwcurtemp": {
@@ -432,6 +440,7 @@
         "en": "°C"
       },
       "decimals": 1,
+      "insights": true,
       "icon": "/assets/thermometer.svg"
     },
     "thermostat_dampedoutdoortemp": {

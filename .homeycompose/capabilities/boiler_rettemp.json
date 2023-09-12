@@ -8,5 +8,6 @@
   "setable": false,
   "units": { "en": "°C" },
   "decimals": 1,
+  "insights": true,
   "icon": "/assets/thermometer.svg"
 }

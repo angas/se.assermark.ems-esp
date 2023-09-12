@@ -6,5 +6,6 @@
   },
   "getable": true,
   "setable": false,
+  "insights": false,
   "icon": "/assets/error.svg"
 }
