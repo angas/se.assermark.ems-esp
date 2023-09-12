@@ -58,13 +58,19 @@ class ThermostatDevice extends Homey.Device {
   }
 
   private async updateCapabilityValues(data: ThermostatData) {
-    return setCapabilityValues(this, [
-      ["thermostat_dampedoutdoortemp", data.dampedoutdoortemp],
-      [
-        "thermostat_hc1_hpoperatingstate",
-        capitalize(data.hc1.hpoperatingstate),
-      ],
-      ["target_temperature", data.hc1.seltemp],
+    // Init target_temperature to the actual value from the thermostat
+    if (this.getCapabilityValue("target_temperature") === null) {
+      await this.setCapabilityValue("target_temperature", data.hc1.seltemp);
+    }
+
+    const {
+      dampedoutdoortemp,
+      hc1: { seltemp, hpoperatingstate },
+    } = data;
+    await setCapabilityValues(this, [
+      ["thermostat_dampedoutdoortemp", dampedoutdoortemp],
+      ["thermostat_hc1_hpoperatingstate", capitalize(hpoperatingstate)],
+      ["measure_temperature", seltemp],
     ]);
   }
 
@@ -76,13 +82,13 @@ class ThermostatDevice extends Homey.Device {
     this.registerCapabilityListener("target_temperature", async (value) => {
       this.log(`Updating selected temperature to ${value}°C`);
       try {
+        this.setCapabilityValue("target_temperature", value).catch(this.error);
         if (this.oldData?.hc1.seltemp === value) {
           this.log(`Don't update selected temperature, is already ${value}°C`);
           return;
         }
         this.stopPolling?.();
         await this.client.setSelectedTemp(value).catch(this.error);
-        this.setCapabilityValue("target_temperature", value).catch(this.error);
         this.log(`Selected temperature updated to ${value}°C`);
       } catch (err) {
         this.error("Failed to update selected temperature", err);

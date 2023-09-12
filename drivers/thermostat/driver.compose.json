@@ -5,6 +5,7 @@
   "class": "thermostat",
   "capabilities": [
     "target_temperature",
+    "measure_temperature",
     "thermostat_dampedoutdoortemp",
     "thermostat_hc1_hpoperatingstate"
   ],
