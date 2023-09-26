@@ -3,7 +3,7 @@ import fetch, { Response } from "node-fetch";
 import { SystemData, DeviceData, ThermostatData, BoilerData } from "./types";
 
 export class EmsEspClient {
-  private mutex = new Mutex();
+  private readonly mutex = new Mutex();
 
   constructor(private networkAddress: string, private accessToken?: string) {}
 
@@ -15,7 +15,7 @@ export class EmsEspClient {
       try {
         const data = await res.json();
         throw Error(`Got response code ${res.status}, ${data}`);
-      } catch (err) {
+      } catch {
         throw Error(`Got response code ${res.status}`);
       }
     }
@@ -25,7 +25,10 @@ export class EmsEspClient {
     try {
       await this.mutex.acquire();
       const res = await EmsEspClient.checkResponse(
-        fetch(`http://${this.networkAddress}/${path}`)
+        fetch(`http://${this.networkAddress}/${path}`, {
+          timeout: 5000,
+          headers: { Accept: "application/json" },
+        })
       );
 
       return (await res.json()) as Promise<T>;
@@ -42,6 +45,7 @@ export class EmsEspClient {
         fetch(`http://${this.networkAddress}/${path}`, {
           method: "POST",
           body: JSON.stringify(body),
+          timeout: 5000,
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${this.accessToken}`,

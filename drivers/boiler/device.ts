@@ -22,10 +22,9 @@ export class BoilerDevice extends Homey.Device {
     // Don't have to explicity triggers that ends with _changed
     // because Homey does that automatically for us
     // https://apps.developer.homey.app/the-basics/flow#custom-capability-changed
-    this.homey.flow
+    return this.homey.flow
       .getDeviceTriggerCard("boiler_wwcurtemp_less_than")
-      ?.trigger(this, { wwcurtemp: newData.wwcurtemp }, newData)
-      .catch(this.error);
+      ?.trigger(this, { wwcurtemp: newData.wwcurtemp }, newData);
   }
 
   private async updateCapabilityValues(data: BoilerData) {
@@ -53,7 +52,7 @@ export class BoilerDevice extends Homey.Device {
         } else if (res) {
           await this.updateCapabilityValues(res).catch(this.error);
           await this.setAvailable().catch(this.error);
-          this.triggerFlows(res);
+          await this.triggerFlows(res).catch(this.error);
         }
       }
     );

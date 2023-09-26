@@ -32,32 +32,38 @@ class ThermostatDevice extends Homey.Device {
         } else if (res) {
           await this.updateCapabilityValues(res).catch(this.error);
           await this.setAvailable().catch(this.error);
-          await this.triggerFlows(res);
+          await this.triggerFlows(res).catch(this.error);
         }
       }
     );
   }
 
   private async triggerFlows(newData: ThermostatData) {
+    const newHc1 = newData.hc1;
+    const oldHc1 = this.oldData?.hc1;
     if (
-      this.oldData &&
-      this.oldData.hc1.hpoperatingstate !== newData.hc1.hpoperatingstate
+      oldHc1 &&
+      newHc1 &&
+      oldHc1.hpoperatingstate !== newHc1.hpoperatingstate
     ) {
-      this.hpoperatingstateChangedTrigger
-        ?.trigger(
-          this,
-          {
-            old_value: capitalize(this.oldData.hc1.hpoperatingstate),
-            new_value: capitalize(newData.hc1.hpoperatingstate),
-          },
-          undefined
-        )
-        .catch(this.error);
+      return this.hpoperatingstateChangedTrigger?.trigger(
+        this,
+        {
+          old_value: capitalize(oldHc1.hpoperatingstate),
+          new_value: capitalize(newHc1.hpoperatingstate),
+        },
+        undefined
+      );
     }
     this.oldData = newData;
   }
 
   private async updateCapabilityValues(data: ThermostatData) {
+    if (!data.hc1) {
+      this.log("No thermostat hc1 data");
+      return;
+    }
+
     // Init target_temperature to the actual value from the thermostat
     if (this.getCapabilityValue("target_temperature") === null) {
       await this.setCapabilityValue("target_temperature", data.hc1.seltemp);
@@ -83,7 +89,7 @@ class ThermostatDevice extends Homey.Device {
       this.log(`Updating selected temperature to ${value}°C`);
       try {
         this.setCapabilityValue("target_temperature", value).catch(this.error);
-        if (this.oldData?.hc1.seltemp === value) {
+        if (this.oldData?.hc1?.seltemp === value) {
           this.log(`Don't update selected temperature, is already ${value}°C`);
           return;
         }

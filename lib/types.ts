@@ -86,51 +86,53 @@ export type ThermostatData = {
   wwdisinfecting: "on" | "off";
   wwdisinfectday: "mo" | "tu" | "we" | "th" | "fr" | "sa" | "su" | "all";
   wwdisinfecttime: number;
-  hc1: {
-    seltemp: number;
-    haclimate: "selTemp" | "roomTemp";
-    mode: "manual" | "auto";
-    modetype: "eco" | "comfort";
-    ecotemp: number;
-    manualtemp: number;
-    comforttemp: number;
-    summertemp: number;
-    designtemp: number;
-    offsettemp: number;
-    minflowtemp: number;
-    maxflowtemp: number;
-    roominfluence: number;
-    roominflfactor: number;
-    curroominfl: number;
-    nofrostmode: "room" | "outdoor" | "room outdoor";
-    nofrosttemp: number;
-    targetflowtemp: number;
-    heatingtype: "off" | "radiator" | "convector" | "floor";
-    hpoperatingmode: "off" | "auto" | "heating" | "cooling";
-    hpoperatingstate: "heating" | "off" | "cooling";
-    controlmode:
-      | "weather compensated"
-      | "outside basepoint"
-      | "n/a"
-      | "room"
-      | "power"
-      | "constant";
-    program: "prog 1" | "prog 2";
-    tempautotemp: number;
-    remoteseltemp: number;
-    fastheatup: number;
-    switchonoptimization: "on" | "off";
-    reducemode: "outdoor" | "room" | "reduce";
-    noreducetemp: number;
-    reducetemp: number;
-    wwprio: "on" | "off";
-    cooling: "on" | "off";
-    coolingon: "on" | "off";
-    hpmode: "heating" | "cooling" | "heating&cooling";
-    dewoffset: number;
-    roomtempdiff: number;
-    hpminflowtemp: number;
-  };
+  hc1:
+    | {
+        seltemp: number;
+        haclimate: "selTemp" | "roomTemp";
+        mode: "manual" | "auto";
+        modetype: "eco" | "comfort";
+        ecotemp: number;
+        manualtemp: number;
+        comforttemp: number;
+        summertemp: number;
+        designtemp: number;
+        offsettemp: number;
+        minflowtemp: number;
+        maxflowtemp: number;
+        roominfluence: number;
+        roominflfactor: number;
+        curroominfl: number;
+        nofrostmode: "room" | "outdoor" | "room outdoor";
+        nofrosttemp: number;
+        targetflowtemp: number;
+        heatingtype: "off" | "radiator" | "convector" | "floor";
+        hpoperatingmode: "off" | "auto" | "heating" | "cooling";
+        hpoperatingstate: "heating" | "off" | "cooling";
+        controlmode:
+          | "weather compensated"
+          | "outside basepoint"
+          | "n/a"
+          | "room"
+          | "power"
+          | "constant";
+        program: "prog 1" | "prog 2";
+        tempautotemp: number;
+        remoteseltemp: number;
+        fastheatup: number;
+        switchonoptimization: "on" | "off";
+        reducemode: "outdoor" | "room" | "reduce";
+        noreducetemp: number;
+        reducetemp: number;
+        wwprio: "on" | "off";
+        cooling: "on" | "off";
+        coolingon: "on" | "off";
+        hpmode: "heating" | "cooling" | "heating&cooling";
+        dewoffset: number;
+        roomtempdiff: number;
+        hpminflowtemp: number;
+      }
+    | undefined;
 };
 
 export type BoilerData = {
