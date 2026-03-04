@@ -10,12 +10,17 @@ import { BoilerData } from "../../lib/types";
 
 export class BoilerDevice extends Homey.Device {
   private stopPolling: (() => void) | null = null;
+  private recoveryTimer: NodeJS.Timeout | null = null;
+  private _client: EmsEspClient | null = null;
 
   private get client() {
-    return new EmsEspClient(
-      this.getSetting("network_address"),
-      this.getSetting("access_token")
-    );
+    if (!this._client) {
+      this._client = new EmsEspClient(
+        this.getSetting("network_address"),
+        this.getSetting("access_token")
+      );
+    }
+    return this._client;
   }
 
   private get intervalMs() {
@@ -28,7 +33,7 @@ export class BoilerDevice extends Homey.Device {
     // https://apps.developer.homey.app/the-basics/flow#custom-capability-changed
     return this.homey.flow
       .getDeviceTriggerCard("boiler_wwcurtemp_less_than")
-      ?.trigger(this, { wwcurtemp: newData.wwcurtemp }, newData);
+      ?.trigger(this, { wwcurtemp: newData.dhw.curtemp }, newData);
   }
 
   private async updateCapabilityValues(data: BoilerData) {
@@ -41,12 +46,13 @@ export class BoilerDevice extends Homey.Device {
       ["boiler_hpcompspd", data.hpcompspd],
       ["boiler_lastcode", formatLastCode(parseLastCode(data.lastcode))],
       ["boiler_rettemp", data.rettemp],
-      ["boiler_wwcurtemp", data.wwcurtemp],
+      ["boiler_wwcurtemp", data.dhw.curtemp],
     ]);
   }
 
   private startPolling() {
     this.stopPolling?.();
+    if (this.recoveryTimer) clearTimeout(this.recoveryTimer);
 
     this.stopPolling = polling(
       this.intervalMs,
@@ -55,8 +61,8 @@ export class BoilerDevice extends Homey.Device {
         if (err) {
           this.error(err);
           await this.setUnavailable(`${err}`).catch(this.error);
-          // Automatically restart polling after the interval to recover from errors.          
-          setTimeout(() => this.startPolling(), this.intervalMs * 2);
+          // Automatically restart polling after the interval to recover from errors.
+          this.recoveryTimer = setTimeout(() => this.startPolling(), this.intervalMs * 2);
         } else if (res) {
           await this.updateCapabilityValues(res).catch(this.error);
           await this.setAvailable().catch(this.error);
@@ -70,8 +76,14 @@ export class BoilerDevice extends Homey.Device {
     this.startPolling();
   }
 
+  async onSettings() {
+    this._client = null;
+    this.startPolling();
+  }
+
   onDeleted() {
     this.stopPolling?.();
+    if (this.recoveryTimer) clearTimeout(this.recoveryTimer);
   }
 }
 

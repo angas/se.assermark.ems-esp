@@ -5,6 +5,8 @@ import { ThermostatData } from "../../lib/types";
 
 class ThermostatDevice extends Homey.Device {
   private stopPolling: (() => void) | null = null;
+  private recoveryTimer: NodeJS.Timeout | null = null;
+  private _client: EmsEspClient | null = null;
   private oldData: ThermostatData | null = null;
   private hpoperatingstateChangedTrigger:
     | Homey.FlowCardTriggerDevice
@@ -15,14 +17,18 @@ class ThermostatDevice extends Homey.Device {
   }
 
   private get client() {
-    return new EmsEspClient(
-      this.getSetting("network_address"),
-      this.getSetting("access_token")
-    );
+    if (!this._client) {
+      this._client = new EmsEspClient(
+        this.getSetting("network_address"),
+        this.getSetting("access_token")
+      );
+    }
+    return this._client;
   }
 
   private startPolling() {
     this.stopPolling?.();
+    if (this.recoveryTimer) clearTimeout(this.recoveryTimer);
 
     this.stopPolling = polling(
       this.intervalMs,
@@ -31,8 +37,8 @@ class ThermostatDevice extends Homey.Device {
         if (err) {
           this.error(err);
           await this.setUnavailable(`${err}`).catch(this.error);
-          // Automatically restart polling after the interval to recover from errors.          
-          setTimeout(() => this.startPolling(), this.intervalMs * 2);
+          // Automatically restart polling after the interval to recover from errors.
+          this.recoveryTimer = setTimeout(() => this.startPolling(), this.intervalMs * 2);
           return;
         } else if (res) {
           await this.updateCapabilityValues(res).catch(this.error);
@@ -46,12 +52,13 @@ class ThermostatDevice extends Homey.Device {
   private async triggerFlows(newData: ThermostatData) {
     const newHc1 = newData.hc1;
     const oldHc1 = this.oldData?.hc1;
+    this.oldData = newData;
     if (
       oldHc1 &&
       newHc1 &&
       oldHc1.hpoperatingstate !== newHc1.hpoperatingstate
     ) {
-      return this.hpoperatingstateChangedTrigger?.trigger(
+      await this.hpoperatingstateChangedTrigger?.trigger(
         this,
         {
           old_value: capitalize(oldHc1.hpoperatingstate),
@@ -60,7 +67,6 @@ class ThermostatDevice extends Homey.Device {
         undefined
       );
     }
-    this.oldData = newData;
   }
 
   private async updateCapabilityValues(data: ThermostatData) {
@@ -114,21 +120,27 @@ class ThermostatDevice extends Homey.Device {
       .getConditionCard("outdoor-temp-less-than")
       .registerRunListener(async (args: { temp: number; }, state) => {
         const temp = this.oldData?.dampedoutdoortemp;
-        return temp && temp < args.temp;
+        return temp != null && temp < args.temp;
       });
 
     this.homey.flow
       .getConditionCard("outdoor-temp-greater-than")
       .registerRunListener(async (args: { temp: number; }, state) => {
         const temp = this.oldData?.dampedoutdoortemp;
-        return temp && temp > args.temp;
+        return temp != null && temp > args.temp;
       });
 
     this.startPolling();
   }
 
+  async onSettings() {
+    this._client = null;
+    this.startPolling();
+  }
+
   onDeleted() {
     this.stopPolling?.();
+    if (this.recoveryTimer) clearTimeout(this.recoveryTimer);
   }
 }
 

@@ -76,7 +76,7 @@
             Homey.hideLoadingOverlay();
             Homey.alert(err, "error", () => {});
           } else {
-            const version = result["System Info"]["version"];
+            const version = result.system.version;
             setTxt("result", `EMS-ESP (ver: ${version}) found!`);
             Homey.emit("set_settings", settings, (err) => {
               Homey.hideLoadingOverlay();

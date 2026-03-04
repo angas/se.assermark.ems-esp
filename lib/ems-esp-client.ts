@@ -12,12 +12,11 @@ export class EmsEspClient {
     if (res.ok) {
       return res;
     } else {
+      let detail = "";
       try {
-        const data = await res.json();
-        throw Error(`Got response code ${res.status}, ${data}`);
-      } catch {
-        throw Error(`Got response code ${res.status}`);
-      }
+        detail = `, ${await res.json()}`;
+      } catch {}
+      throw Error(`Got response code ${res.status}${detail}`);
     }
   }
 
@@ -31,7 +30,7 @@ export class EmsEspClient {
         })
       );
 
-      return (await res.json()) as Promise<T>;
+      return (await res.json()) as T;
     } finally {
       this.mutex.release();
     }
@@ -40,8 +39,8 @@ export class EmsEspClient {
   private async post<T>(path: string, body: T) {
     if (!this.accessToken) throw Error("No access token");
     try {
-      this.mutex.acquire();
-      return EmsEspClient.checkResponse(
+      await this.mutex.acquire();
+      return await EmsEspClient.checkResponse(
         fetch(`http://${this.networkAddress}/${path}`, {
           method: "POST",
           body: JSON.stringify(body),
@@ -62,7 +61,7 @@ export class EmsEspClient {
   }
 
   public async getDevices(): Promise<Array<DeviceData>> {
-    return this.getSystemData().then((systemData) => systemData.Devices);
+    return this.getSystemData().then((systemData) => systemData.devices);
   }
 
   public async getThermostatData(): Promise<ThermostatData> {

@@ -36,8 +36,8 @@ export function driverOnPair(
       .filter((device) => device.type === deviceType)
       .map((device) => {
         return {
-          name: `EMS-ESP ${capitalize(deviceType)} ${device["device id"]}`,
-          data: { id: device["device id"] },
+          name: `EMS-ESP ${capitalize(deviceType)} ${device.deviceID}`,
+          data: { id: device.deviceID },
           settings: { network_address, access_token },
         };
       });
@@ -66,7 +66,7 @@ type LastCodeTokens = {
 };
 
 export function parseLastCode(text: string) {
-  const match = text.match(/(\w+)\(([\d+^)]+)\)/);
+  const match = text.match(/(\w+)\((\d+)\)/);
   return match
     ? ({
         prefix: match[1],
