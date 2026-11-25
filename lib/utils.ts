@@ -93,10 +93,17 @@ export function polling<T>(
 
   const poll = async () => {
     if (stopped) return;
+    let res: T | null = null;
+    let error: Error | null = null;
     try {
-      cb(null, await fn());
+      res = await fn();
     } catch (err) {
-      cb(err instanceof Error ? err : new Error(String(err)), null);
+      error = err instanceof Error ? err : new Error(String(err));
+    }
+    // Drop the result of a request that was still in flight when polling was stopped.
+    if (stopped) return;
+    try {
+      cb(error, res);
     } finally {
       if (!stopped) {
         timer = device.homey.setTimeout(() => {

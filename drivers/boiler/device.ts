@@ -10,7 +10,8 @@ import { BoilerData } from '../../lib/types';
 
 class BoilerDevice extends Homey.Device {
   private stopPolling: (() => void) | null = null;
-  private recoveryTimer: NodeJS.Timeout | null = null;
+  private restartTimer: NodeJS.Timeout | null = null;
+  private deleted = false;
   private _client: EmsEspClient | null = null;
 
   private get client() {
@@ -51,8 +52,9 @@ class BoilerDevice extends Homey.Device {
   }
 
   private startPolling() {
+    if (this.deleted) return;
     this.stopPolling?.();
-    if (this.recoveryTimer) this.homey.clearTimeout(this.recoveryTimer);
+    if (this.restartTimer) this.homey.clearTimeout(this.restartTimer);
 
     this.stopPolling = polling(
       this,
@@ -64,12 +66,18 @@ class BoilerDevice extends Homey.Device {
     );
   }
 
+  private restartPollingAfter(delayMs: number) {
+    if (this.restartTimer) this.homey.clearTimeout(this.restartTimer);
+    this.restartTimer = this.homey.setTimeout(() => this.startPolling(), delayMs);
+  }
+
   private async handlePollResult(err: Error | null, res: BoilerData | null) {
     if (err) {
       this.error(err);
+      // Stop regular polling and retry once after a doubled interval.
+      this.stopPolling?.();
+      this.restartPollingAfter(this.intervalMs * 2);
       await this.setUnavailable(`${err}`).catch(this.error);
-      // Automatically restart polling after the interval to recover from errors.
-      this.recoveryTimer = this.homey.setTimeout(() => this.startPolling(), this.intervalMs * 2);
     } else if (res) {
       await this.updateCapabilityValues(res).catch(this.error);
       await this.setAvailable().catch(this.error);
@@ -87,8 +95,9 @@ class BoilerDevice extends Homey.Device {
   }
 
   onDeleted() {
+    this.deleted = true;
     this.stopPolling?.();
-    if (this.recoveryTimer) this.homey.clearTimeout(this.recoveryTimer);
+    if (this.restartTimer) this.homey.clearTimeout(this.restartTimer);
   }
 }
 
