@@ -1,7 +1,7 @@
-import Homey from "homey";
-import { EmsEspClient } from "../../lib/ems-esp-client";
-import { capitalize, polling, setCapabilityValues } from "../../lib/utils";
-import { ThermostatData } from "../../lib/types";
+import Homey from 'homey';
+import EmsEspClient from '../../lib/ems-esp-client';
+import { capitalize, polling, setCapabilityValues } from '../../lib/utils';
+import { ThermostatData } from '../../lib/types';
 
 class ThermostatDevice extends Homey.Device {
   private stopPolling: (() => void) | null = null;
@@ -13,14 +13,14 @@ class ThermostatDevice extends Homey.Device {
     | undefined;
 
   private get intervalMs() {
-    return Number(this.getSetting("poll_interval") || 10000);
+    return Number(this.getSetting('poll_interval') || 10000);
   }
 
   private get client() {
     if (!this._client) {
       this._client = new EmsEspClient(
-        this.getSetting("network_address"),
-        this.getSetting("access_token")
+        this.getSetting('network_address'),
+        this.getSetting('access_token'),
       );
     }
     return this._client;
@@ -28,25 +28,29 @@ class ThermostatDevice extends Homey.Device {
 
   private startPolling() {
     this.stopPolling?.();
-    if (this.recoveryTimer) clearTimeout(this.recoveryTimer);
+    if (this.recoveryTimer) this.homey.clearTimeout(this.recoveryTimer);
 
     this.stopPolling = polling(
+      this,
       this.intervalMs,
       () => this.client.getThermostatData(),
-      async (err, res) => {
-        if (err) {
-          this.error(err);
-          await this.setUnavailable(`${err}`).catch(this.error);
-          // Automatically restart polling after the interval to recover from errors.
-          this.recoveryTimer = setTimeout(() => this.startPolling(), this.intervalMs * 2);
-          return;
-        } else if (res) {
-          await this.updateCapabilityValues(res).catch(this.error);
-          await this.setAvailable().catch(this.error);
-          await this.triggerFlows(res).catch(this.error);
-        }
-      }
+      (err, res) => {
+        this.handlePollResult(err, res).catch(this.error);
+      },
     );
+  }
+
+  private async handlePollResult(err: Error | null, res: ThermostatData | null) {
+    if (err) {
+      this.error(err);
+      await this.setUnavailable(`${err}`).catch(this.error);
+      // Automatically restart polling after the interval to recover from errors.
+      this.recoveryTimer = this.homey.setTimeout(() => this.startPolling(), this.intervalMs * 2);
+    } else if (res) {
+      await this.updateCapabilityValues(res).catch(this.error);
+      await this.setAvailable().catch(this.error);
+      await this.triggerFlows(res).catch(this.error);
+    }
   }
 
   private async triggerFlows(newData: ThermostatData) {
@@ -54,9 +58,9 @@ class ThermostatDevice extends Homey.Device {
     const oldHc1 = this.oldData?.hc1;
     this.oldData = newData;
     if (
-      oldHc1 &&
-      newHc1 &&
-      oldHc1.hpoperatingstate !== newHc1.hpoperatingstate
+      oldHc1
+      && newHc1
+      && oldHc1.hpoperatingstate !== newHc1.hpoperatingstate
     ) {
       await this.hpoperatingstateChangedTrigger?.trigger(
         this,
@@ -64,20 +68,20 @@ class ThermostatDevice extends Homey.Device {
           old_value: capitalize(oldHc1.hpoperatingstate),
           new_value: capitalize(newHc1.hpoperatingstate),
         },
-        undefined
+        undefined,
       );
     }
   }
 
   private async updateCapabilityValues(data: ThermostatData) {
     if (!data.hc1) {
-      this.log("No thermostat hc1 data");
+      this.log('No thermostat hc1 data');
       return;
     }
 
     // Init target_temperature to the actual value from the thermostat
-    if (this.getCapabilityValue("target_temperature") === null) {
-      await this.setCapabilityValue("target_temperature", data.hc1.seltemp);
+    if (this.getCapabilityValue('target_temperature') === null) {
+      await this.setCapabilityValue('target_temperature', data.hc1.seltemp);
     }
 
     const {
@@ -85,21 +89,21 @@ class ThermostatDevice extends Homey.Device {
       hc1: { seltemp, hpoperatingstate },
     } = data;
     await setCapabilityValues(this, [
-      ["thermostat_dampedoutdoortemp", dampedoutdoortemp],
-      ["thermostat_hc1_hpoperatingstate", capitalize(hpoperatingstate)],
-      ["measure_temperature", seltemp],
+      ['thermostat_dampedoutdoortemp', dampedoutdoortemp],
+      ['thermostat_hc1_hpoperatingstate', capitalize(hpoperatingstate)],
+      ['measure_temperature', seltemp],
     ]);
   }
 
   async onInit() {
     this.hpoperatingstateChangedTrigger = this.homey.flow.getDeviceTriggerCard(
-      "thermostat_hc1_hpoperatingstate_changed"
+      'thermostat_hc1_hpoperatingstate_changed',
     );
 
-    this.registerCapabilityListener("target_temperature", async (value) => {
+    this.registerCapabilityListener('target_temperature', async (value) => {
       this.log(`Updating selected temperature to ${value}°C`);
       try {
-        this.setCapabilityValue("target_temperature", value).catch(this.error);
+        this.setCapabilityValue('target_temperature', value).catch(this.error);
         if (this.oldData?.hc1?.seltemp === value) {
           this.log(`Don't update selected temperature, is already ${value}°C`);
           return;
@@ -108,23 +112,23 @@ class ThermostatDevice extends Homey.Device {
         await this.client.setSelectedTemp(value).catch(this.error);
         this.log(`Selected temperature updated to ${value}°C`);
       } catch (err) {
-        this.error("Failed to update selected temperature", err);
+        this.error('Failed to update selected temperature', err);
         this.setUnavailable(`${err}`).catch(this.error);
       } finally {
         // Don't start polling until the thermostat has been updated
-        setTimeout(() => this.startPolling(), this.intervalMs);
+        this.homey.setTimeout(() => this.startPolling(), this.intervalMs);
       }
     });
 
     this.homey.flow
-      .getConditionCard("outdoor-temp-less-than")
+      .getConditionCard('outdoor-temp-less-than')
       .registerRunListener(async (args: { temp: number; }, state) => {
         const temp = this.oldData?.dampedoutdoortemp;
         return temp != null && temp < args.temp;
       });
 
     this.homey.flow
-      .getConditionCard("outdoor-temp-greater-than")
+      .getConditionCard('outdoor-temp-greater-than')
       .registerRunListener(async (args: { temp: number; }, state) => {
         const temp = this.oldData?.dampedoutdoortemp;
         return temp != null && temp > args.temp;
@@ -140,8 +144,8 @@ class ThermostatDevice extends Homey.Device {
 
   onDeleted() {
     this.stopPolling?.();
-    if (this.recoveryTimer) clearTimeout(this.recoveryTimer);
+    if (this.recoveryTimer) this.homey.clearTimeout(this.recoveryTimer);
   }
 }
 
-module.exports = ThermostatDevice;
+export = ThermostatDevice;

@@ -1,22 +1,28 @@
-import { Mutex } from "async-mutex";
-import { SystemData, DeviceData, ThermostatData, BoilerData } from "./types";
+import { Mutex } from 'async-mutex';
+import {
+  SystemData, DeviceData, ThermostatData, BoilerData,
+} from './types';
 
-export class EmsEspClient {
+export default class EmsEspClient {
   private readonly mutex = new Mutex();
+  private readonly networkAddress: string;
+  private readonly accessToken?: string;
 
-  constructor(private networkAddress: string, private accessToken?: string) {}
+  constructor(networkAddress: string, accessToken?: string) {
+    this.networkAddress = networkAddress;
+    this.accessToken = accessToken;
+  }
 
   public static async checkResponse(response: Response | Promise<Response>) {
     const res = response instanceof Response ? response : await response;
     if (res.ok) {
       return res;
-    } else {
-      let detail = "";
-      try {
-        detail = `, ${await res.json()}`;
-      } catch {}
-      throw Error(`Got response code ${res.status}${detail}`);
     }
+    let detail = '';
+    try {
+      detail = `, ${await res.json()}`;
+    } catch {}
+    throw Error(`Got response code ${res.status}${detail}`);
   }
 
   private async request(path: string, init: RequestInit) {
@@ -25,12 +31,12 @@ export class EmsEspClient {
       return await fetch(url, { ...init, signal: AbortSignal.timeout(5000) });
     } catch (err) {
       // Native fetch reports only "fetch failed"; the reason is in the cause.
-      const reason =
-        err instanceof Error && err.name === "TimeoutError"
-          ? "network timeout"
-          : err instanceof Error && err.cause instanceof Error
-          ? err.cause.message
-          : `${err}`;
+      let reason = `${err}`;
+      if (err instanceof Error && err.name === 'TimeoutError') {
+        reason = 'network timeout';
+      } else if (err instanceof Error && err.cause instanceof Error) {
+        reason = err.cause.message;
+      }
       throw Error(`Request to ${url} failed, reason: ${reason}`);
     }
   }
@@ -39,7 +45,7 @@ export class EmsEspClient {
     try {
       await this.mutex.acquire();
       const res = await EmsEspClient.checkResponse(
-        this.request(path, { headers: { Accept: "application/json" } })
+        this.request(path, { headers: { Accept: 'application/json' } }),
       );
 
       return (await res.json()) as T;
@@ -49,18 +55,18 @@ export class EmsEspClient {
   }
 
   private async post<T>(path: string, body: T) {
-    if (!this.accessToken) throw Error("No access token");
+    if (!this.accessToken) throw Error('No access token');
     try {
       await this.mutex.acquire();
       return await EmsEspClient.checkResponse(
         this.request(path, {
-          method: "POST",
+          method: 'POST',
           body: JSON.stringify(body),
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
             Authorization: `Bearer ${this.accessToken}`,
           },
-        })
+        }),
       );
     } finally {
       this.mutex.release();
@@ -68,7 +74,7 @@ export class EmsEspClient {
   }
 
   public async getSystemData(): Promise<SystemData> {
-    return this.get<SystemData>("api/system");
+    return this.get<SystemData>('api/system');
   }
 
   public async getDevices(): Promise<Array<DeviceData>> {
@@ -76,14 +82,14 @@ export class EmsEspClient {
   }
 
   public async getThermostatData(): Promise<ThermostatData> {
-    return this.get<ThermostatData>("api/thermostat");
+    return this.get<ThermostatData>('api/thermostat');
   }
 
   public async setSelectedTemp(temp: number) {
-    await this.post("api/thermostat", { cmd: "seltemp", data: temp });
+    await this.post('api/thermostat', { cmd: 'seltemp', data: temp });
   }
 
   public async getBoilerData(): Promise<BoilerData> {
-    return this.get<BoilerData>("api/boiler");
+    return this.get<BoilerData>('api/boiler');
   }
 }

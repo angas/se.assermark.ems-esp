@@ -1,10 +1,9 @@
-import Homey from "homey";
-import { BoilerData, ThermostatData } from "./lib/types";
+import Homey from 'homey';
 
 class MyApp extends Homey.App {
   async onInit() {
-    this.log("App EMS-ESP has been initialized");
+    this.log('App EMS-ESP has been initialized');
   }
 }
 
-module.exports = MyApp;
+export = MyApp;

@@ -1,4 +1,4 @@
-import { Mutex } from "async-mutex";
+import { Mutex } from 'async-mutex';
 
 export type Settings = {
   network_address: string;
@@ -13,20 +13,6 @@ export type DeviceSettings = {
   timeout: NodeJS.Timeout | null;
 };
 
-export type SystemData = {
-  system: SystemInfo;
-  network: unknown;
-  ntp: unknown;
-  ap: unknown;
-  mqtt: unknown;
-  syslog: unknown;
-  sensor: unknown;
-  api: unknown;
-  bus: unknown;
-  settings: unknown;
-  devices: Array<DeviceData>;
-};
-
 export type SystemInfo = {
   version: string;
   platform: string;
@@ -39,18 +25,18 @@ export type SystemInfo = {
 };
 
 export type DeviceType =
-  | "boiler"
-  | "thermostat"
-  | "heatpump"
-  | "heatsource"
-  | "solar"
-  | "connect"
-  | "mixer"
-  | "controller"
-  | "switch"
-  | "gateway"
-  | "alert"
-  | "pump";
+  | 'boiler'
+  | 'thermostat'
+  | 'heatpump'
+  | 'heatsource'
+  | 'solar'
+  | 'connect'
+  | 'mixer'
+  | 'controller'
+  | 'switch'
+  | 'gateway'
+  | 'alert'
+  | 'pump';
 
 export type DeviceData = {
   type: DeviceType;
@@ -64,6 +50,20 @@ export type DeviceData = {
   handlersFetched: string;
   handlersPending: string;
   handlersIgnored: string;
+};
+
+export type SystemData = {
+  system: SystemInfo;
+  network: unknown;
+  ntp: unknown;
+  ap: unknown;
+  mqtt: unknown;
+  syslog: unknown;
+  sensor: unknown;
+  api: unknown;
+  bus: unknown;
+  settings: unknown;
+  devices: Array<DeviceData>;
 };
 
 export type ThermostatHc1Data = {
