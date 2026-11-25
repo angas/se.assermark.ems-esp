@@ -1,5 +1,4 @@
 import { Mutex } from "async-mutex";
-import fetch, { Response } from "node-fetch";
 import { SystemData, DeviceData, ThermostatData, BoilerData } from "./types";
 
 export class EmsEspClient {
@@ -20,14 +19,27 @@ export class EmsEspClient {
     }
   }
 
+  private async request(path: string, init: RequestInit) {
+    const url = `http://${this.networkAddress}/${path}`;
+    try {
+      return await fetch(url, { ...init, signal: AbortSignal.timeout(5000) });
+    } catch (err) {
+      // Native fetch reports only "fetch failed"; the reason is in the cause.
+      const reason =
+        err instanceof Error && err.name === "TimeoutError"
+          ? "network timeout"
+          : err instanceof Error && err.cause instanceof Error
+          ? err.cause.message
+          : `${err}`;
+      throw Error(`Request to ${url} failed, reason: ${reason}`);
+    }
+  }
+
   private async get<T>(path: string) {
     try {
       await this.mutex.acquire();
       const res = await EmsEspClient.checkResponse(
-        fetch(`http://${this.networkAddress}/${path}`, {
-          timeout: 5000,
-          headers: { Accept: "application/json" },
-        })
+        this.request(path, { headers: { Accept: "application/json" } })
       );
 
       return (await res.json()) as T;
@@ -41,10 +53,9 @@ export class EmsEspClient {
     try {
       await this.mutex.acquire();
       return await EmsEspClient.checkResponse(
-        fetch(`http://${this.networkAddress}/${path}`, {
+        this.request(path, {
           method: "POST",
           body: JSON.stringify(body),
-          timeout: 5000,
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${this.accessToken}`,

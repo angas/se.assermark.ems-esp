@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Homey Pro app that integrates with EMS-ESP (open-source boiler/heat pump controller) over HTTP/REST. SDK version 3, requires Homey 5.0.0+.
+Homey Pro app that integrates with EMS-ESP (open-source boiler/heat pump controller) over HTTP/REST. SDK version 3, requires Homey 12.9.0+ (Node.js 22 runtime).
 
 ## Build & Development Commands
 
@@ -25,7 +25,7 @@ No test framework is configured.
 - `drivers/thermostat/` — Class `thermostat`. Read-only: current temp, outdoor temp, heat pump state. Writable: `target_temperature`.
 
 **Core library (`lib/`):**
-- `ems-esp-client.ts` — HTTP client with Bearer token auth and Mutex-serialized requests (5s timeout).
+- `ems-esp-client.ts` — HTTP client (native `fetch`) with Bearer token auth and Mutex-serialized requests (5s timeout).
 - `types.ts` — TypeScript types for EMS-ESP API responses (`ThermostatData`, `BoilerData`).
 - `utils.ts` — `polling()` creates infinite poll loops; `setCapabilityValues()` batches capability updates; `throttling()` prevents duplicate flow triggers.
 - `error-codes.ts` — Boiler error code → Swedish description mapping.

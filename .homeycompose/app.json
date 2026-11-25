@@ -1,7 +1,7 @@
 {
   "id": "se.assermark.ems-esp",
   "version": "1.0.0",
-  "compatibility": ">=5.0.0",
+  "compatibility": ">=12.9.0",
   "sdk": 3,
   "platforms": ["local"],
   "name": {
